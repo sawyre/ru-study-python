@@ -1,4 +1,5 @@
 from typing import Any, Callable, List, Tuple
+from functools import reduce
 
 
 class FilterMapExercise:
@@ -15,4 +16,10 @@ class FilterMapExercise:
         :param input_array: Исходный список.
         :return: Отфильтрованный список.
         """
-        pass
+        # result = [func(elem)[1] if func(elem)[0] for elem in input_array]
+        result = reduce(
+            lambda res, elem: (res + [func(elem)[1]]) if func(elem)[0] else res,
+            input_array,
+            [] 
+        )
+        return result
