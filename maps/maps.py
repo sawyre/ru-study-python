@@ -1,5 +1,5 @@
 from typing import Union
-from functools import partial
+from functools import partial, reduce
 
 
 class MapExercise:
@@ -20,7 +20,7 @@ class MapExercise:
         elem_number = 0
         if row[field] != "":
             elem_number = reduce(
-                lambda elem_number, symbol: elem_number + 1 if symbol == sep,
+                lambda elem_number, symbol: elem_number + 1 if symbol == sep else elem_number,
                 row[field],
                 1
             )
@@ -62,7 +62,7 @@ class MapExercise:
     @staticmethod
     def count_symbols(obj: str, counted_symbol: str):
         symbols_count = reduce(
-            lambda symbols_number, symbol: symbols_number + 1 if lower(symbol) == counted_symbol,
+            lambda symbols_number, symbol: symbols_number + 1 if lower(symbol) == counted_symbol else symbols_number,
             obj,
             0
         )
@@ -86,7 +86,8 @@ class MapExercise:
             lambda row: row["rating_kinopoisk"] and float(row["rating_kinopoisk"]) >= rating, 
             list_of_movies
         )
-        symbols_count = reduce(lambda sum_symbols, x: sum_symbols + x,
+        symbols_count = reduce(
+            lambda sum_symbols, x: sum_symbols + x,
             map(
                 partial(count_symbols, counted_symbol="и"),
                 filtered_movies
