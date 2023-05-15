@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, make_response, json
 
 
 class FlaskExercise:
@@ -28,4 +28,64 @@ class FlaskExercise:
 
     @staticmethod
     def configure_routes(app: Flask) -> None:
+        self.users = {}
+        app.add_url_rule("/user", methods=['POST'], view_func=create_user)
+        app.add_url_rule("/user/<name>", methods=['GET'], view_func=get_user)
+        app.add_url_rule("/user/<name>", methods=['PATCH'], view_func=update_user)
+        app.add_url_rule("/user/<name>", methods=['DELETE'], view_func=delete_user)
+    
+    @staticmethod
+    def create_user() -> dict:
+        json_data = request.form
+        if "name" in json_data and json_data["name"] not in self.users:
+            new_user = json_data["name"]
+            self.users[new_user] = {}
+            response = make_response(
+                json.dump(
+                    {
+                        "data": f"User {name} is created!"
+                    },
+                    201,
+                    {
+                        "Content-Type": "application/json"
+                    }
+                )
+            )
+        else:
+            response = make_response(
+                json.dump(
+                    {
+                        "errors": {"name": "This field is required"}
+                    },
+                    422,
+                    {
+                        "Content-Type": "application/json"
+                    }
+                )
+            )
+        
+        return response
+
+    @staticmethod
+    def get_user(name) -> dict:
+        if name in self.users:
+            response = make_response(
+                json.dump(
+                    {
+                        "data": f"My name is {name}"
+                    },
+                    201,
+                    {
+                        "Content-Type": "application/json"
+                    }
+                )
+            )
+
+
+    @staticmethod
+    def update_user(name) -> dict:
+        pass
+
+    @staticmethod
+    def delete_user(name) -> dict:
         pass
