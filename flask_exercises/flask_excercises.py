@@ -41,27 +41,15 @@ class FlaskExercise:
             new_user = json_data["name"]
             self.users[new_user] = {}
             response = make_response(
-                json.dump(
-                    {
-                        "data": f"User {name} is created!"
-                    },
-                    201,
-                    {
-                        "Content-Type": "application/json"
-                    }
-                )
+                json.dump({"data": f"User {name} is created!"}),
+                201,
+                json.dump({"Content-Type": "application/json"})
             )
         else:
             response = make_response(
-                json.dump(
-                    {
-                        "errors": {"name": "This field is required"}
-                    },
-                    422,
-                    {
-                        "Content-Type": "application/json"
-                    }
-                )
+                json.dump({"errors": {"name": f"This field is required"}}),
+                422,
+                json.dump({"Content-Type": "application/json"})
             )
         
         return response
@@ -70,22 +58,45 @@ class FlaskExercise:
     def get_user(name) -> dict:
         if name in self.users:
             response = make_response(
-                json.dump(
-                    {
-                        "data": f"My name is {name}"
-                    },
-                    201,
-                    {
-                        "Content-Type": "application/json"
-                    }
-                )
+                json.dump({"data": f"My name is {name}"}),
+                200,
+                json.dump({"Content-Type": "application/json"})
             )
-
+        else:
+            response = make_response(
+                json.dump({"errors": {"name": f"User {name} not found"}}),
+                404,
+                json.dump({"Content-Type": "application/json"})
+            )
+        return response
 
     @staticmethod
     def update_user(name) -> dict:
-        pass
+        json_data = request.form
+        if name in self.users:
+            self.users[json_data["name"]] = self.users.pop(name)
+            response = make_response(
+                json.dump({"data": "My name is <new_name>"}),
+                200,
+                json.dump({"Content-Type": "application/json"})
+            )
+        else:
+            response = make_response(
+                json.dump({"errors": {"name": f"User {name} not found"}}),
+                404,
+                json.dump({"Content-Type": "application/json"})
+            )
+        return response
 
     @staticmethod
     def delete_user(name) -> dict:
-        pass
+        if name in self.users:
+            self.users.pop(name)
+            response = make_response({}, 204)
+        else:
+            response = make_response(
+                json.dump({"errors": {"name": f"User {name} not found"}}),
+                404,
+                json.dump({"Content-Type": "application/json"})
+            )
+        return response
