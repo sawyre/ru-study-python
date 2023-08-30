@@ -16,10 +16,7 @@ class FilterMapExercise:
         :param input_array: Исходный список.
         :return: Отфильтрованный список.
         """
-        # result = [func(elem)[1] if func(elem)[0] for elem in input_array]
         result = reduce(
-            lambda res, elem: (res + [func(elem)[1]]) if func(elem)[0] else res,
-            input_array,
-            [] 
+            lambda res, elem: (res + [func(elem)[1]]) if func(elem)[0] else res, input_array, []
         )
         return result
