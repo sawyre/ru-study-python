@@ -15,12 +15,11 @@ class ListExercise:
 
         return max_elem
 
-    
     @staticmethod
     def replace(input_list: list[int]) -> list[int]:
         """
-        Заменить все положительные элементы целочисленного списка на максимальное значение
-        элементов списка.
+        Заменить все положительные элементы целочисленного списка на
+        максимальное значение элементов списка.
 
         :param input_list: Исходный список
         :return: Список с замененными элементами
@@ -30,7 +29,6 @@ class ListExercise:
 
         max_elem = ListExercise.find_max(input_list)
         return [max_elem if elem > 0 else elem for elem in input_list]
-
 
     @staticmethod
     def search(input_list: list[int], query: int) -> int:
