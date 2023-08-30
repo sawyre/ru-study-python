@@ -5,7 +5,7 @@ from functools import partial, reduce
 class MapExercise:
     @staticmethod
     def has_required_elems_number(
-        row: dict, field: str, required_elem_number: int, sep: str = ','
+        row: dict, field: str, required_elem_number: int, sep: str = ","
     ) -> bool:
         """
         Проверка на наличие указанного количество элементов в строке.
@@ -22,11 +22,9 @@ class MapExercise:
             elem_number = reduce(
                 lambda elem_number, symbol: elem_number + 1 if symbol == sep else elem_number,
                 row[field],
-                1
+                1,
             )
         return elem_number >= required_elem_number
-
-        
 
     @staticmethod
     def rating(list_of_movies: list[dict]) -> float:
@@ -40,33 +38,34 @@ class MapExercise:
         :return: Средний рейтинг фильмов у которых две или больше стран
         """
         filtered_movies = filter(
-            partial(has_required_elems_number, field="country", required_elem_number = 2), 
-            list_of_movies
+            partial(MapExercise.has_required_elems_number, field="country", required_elem_number=2),
+            list_of_movies,
         )
         rating_of_filtered_movies = list(
             map(
                 lambda row: float(row["rating_kinopoisk"]) if row["rating_kinopoisk"] else 0,
-                list_of_movies
+                filtered_movies,
             )
         )
-        rating_of_filtered_movies = filter(
-            lambda rating: rating > 0,
-            rating_of_filtered_movies,
+        rating_of_filtered_movies = list(
+            filter(lambda rating: rating > 0, rating_of_filtered_movies)
         )
+
         rating_sum = reduce(
-            lambda rating_sum, rating: rating_sum + rating, 
-            rating_of_filtered_movies
+            lambda rating_sum, rating: rating_sum + rating, rating_of_filtered_movies
         )
-        return rating_sum / len(rating_kinopoisk)
+        return rating_sum / len(rating_of_filtered_movies)
 
     @staticmethod
-    def count_symbols(obj: str, counted_symbol: str):
+    def count_symbols(obj: dict, counted_symbol: str) -> int:
         symbols_count = reduce(
-            lambda symbols_number, symbol: symbols_number + 1 if lower(symbol) == counted_symbol else symbols_number,
-            obj,
-            0
+            lambda symbols_number, symbol: symbols_number + 1
+            if symbol == counted_symbol
+            else symbols_number,
+            obj["name"],
+            0,
         )
-        return symbols_number
+        return symbols_count
 
     @staticmethod
     def chars_count(list_of_movies: list[dict], rating: Union[float, int]) -> int:
@@ -83,14 +82,16 @@ class MapExercise:
         """
 
         filtered_movies = filter(
-            lambda row: row["rating_kinopoisk"] and float(row["rating_kinopoisk"]) >= rating, 
-            list_of_movies
+            lambda row: row["rating_kinopoisk"] and float(row["rating_kinopoisk"]) >= rating,
+            list_of_movies,
         )
+
+        if not filtered_movies:
+            return 0
+
         symbols_count = reduce(
             lambda sum_symbols, x: sum_symbols + x,
-            map(
-                partial(count_symbols, counted_symbol="и"),
-                filtered_movies
-            )
+            map(partial(MapExercise.count_symbols, counted_symbol="и"), filtered_movies),
+            0,
         )
         return symbols_count
