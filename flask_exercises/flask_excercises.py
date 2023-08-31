@@ -1,4 +1,4 @@
-from flask import Flask, make_response, json
+from flask import Flask, make_response, json, request
 
 
 class FlaskExercise:
@@ -28,20 +28,20 @@ class FlaskExercise:
 
     @staticmethod
     def configure_routes(app: Flask) -> None:
-        self.users = {}
-        app.add_url_rule("/user", methods=['POST'], view_func=create_user)
-        app.add_url_rule("/user/<name>", methods=['GET'], view_func=get_user)
-        app.add_url_rule("/user/<name>", methods=['PATCH'], view_func=update_user)
-        app.add_url_rule("/user/<name>", methods=['DELETE'], view_func=delete_user)
+        FlaskExercise.users = {}
+        app.add_url_rule("/user", methods=['POST'], view_func=FlaskExercise.create_user)
+        app.add_url_rule("/user/<name>", methods=['GET'], view_func=FlaskExercise.get_user)
+        app.add_url_rule("/user/<name>", methods=['PATCH'], view_func=FlaskExercise.update_user)
+        app.add_url_rule("/user/<name>", methods=['DELETE'], view_func=FlaskExercise.delete_user)
     
     @staticmethod
     def create_user() -> dict:
         json_data = request.form
-        if "name" in json_data and json_data["name"] not in self.users:
+        if "name" in json_data and json_data["name"] not in FlaskExercise.users:
             new_user = json_data["name"]
-            self.users[new_user] = {}
+            FlaskExercise.users[new_user] = {}
             response = make_response(
-                json.dump({"data": f"User {name} is created!"}),
+                json.dump({"data": f"User {new_user} is created!"}),
                 201,
                 json.dump({"Content-Type": "application/json"})
             )
@@ -56,7 +56,7 @@ class FlaskExercise:
 
     @staticmethod
     def get_user(name) -> dict:
-        if name in self.users:
+        if name in FlaskExercise.users:
             response = make_response(
                 json.dump({"data": f"My name is {name}"}),
                 200,
@@ -73,8 +73,8 @@ class FlaskExercise:
     @staticmethod
     def update_user(name) -> dict:
         json_data = request.form
-        if name in self.users:
-            self.users[json_data["name"]] = self.users.pop(name)
+        if name in FlaskExercise.users:
+            FlaskExercise.users[json_data["name"]] = FlaskExercise.users.pop(name)
             response = make_response(
                 json.dump({"data": "My name is <new_name>"}),
                 200,
@@ -90,8 +90,8 @@ class FlaskExercise:
 
     @staticmethod
     def delete_user(name) -> dict:
-        if name in self.users:
-            self.users.pop(name)
+        if name in FlaskExercise.users:
+            FlaskExercise.users.pop(name)
             response = make_response({}, 204)
         else:
             response = make_response(
