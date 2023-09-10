@@ -1,4 +1,4 @@
-from flask import Flask, make_response, json, request
+from flask import Flask, json, request, Response
 
 
 class FlaskExercise:
@@ -28,75 +28,74 @@ class FlaskExercise:
 
     @staticmethod
     def configure_routes(app: Flask) -> None:
-        FlaskExercise.users = {}
-        app.add_url_rule("/user", methods=['POST'], view_func=FlaskExercise.create_user)
-        app.add_url_rule("/user/<name>", methods=['GET'], view_func=FlaskExercise.get_user)
-        app.add_url_rule("/user/<name>", methods=['PATCH'], view_func=FlaskExercise.update_user)
-        app.add_url_rule("/user/<name>", methods=['DELETE'], view_func=FlaskExercise.delete_user)
-    
+        app.add_url_rule("/user", methods=["POST"], view_func=FlaskExercise.create_user)
+        app.add_url_rule("/user/<string:name>", methods=["GET"], view_func=FlaskExercise.get_user)
+        app.add_url_rule(
+            "/user/<string:name>", methods=["PATCH"], view_func=FlaskExercise.update_user
+        )
+        app.add_url_rule(
+            "/user/<string:name>", methods=["DELETE"], view_func=FlaskExercise.delete_user
+        )
+
     @staticmethod
-    def create_user() -> dict:
-        json_data = request.form
+    def create_user() -> Response:
+        json_data = request.get_json()
+        FlaskExercise.users = {}
         if "name" in json_data and json_data["name"] not in FlaskExercise.users:
             new_user = json_data["name"]
             FlaskExercise.users[new_user] = {}
-            response = make_response(
-                json.dump({"data": f"User {new_user} is created!"}),
-                201,
-                json.dump({"Content-Type": "application/json"})
+            return Response(
+                response=json.dumps({"data": f"User {new_user} is created!"}),
+                status=201,
+                content_type="application/json",
             )
         else:
-            response = make_response(
-                json.dump({"errors": {"name": f"This field is required"}}),
-                422,
-                json.dump({"Content-Type": "application/json"})
+            return Response(
+                response=json.dumps({"errors": {"name": "This field is required"}}),
+                status=422,
+                content_type="application/json",
             )
-        
-        return response
 
     @staticmethod
-    def get_user(name) -> dict:
+    def get_user(name: str) -> Response:
         if name in FlaskExercise.users:
-            response = make_response(
-                json.dump({"data": f"My name is {name}"}),
-                200,
-                json.dump({"Content-Type": "application/json"})
+            return Response(
+                response=json.dumps({"data": f"My name is {name}"}),
+                status=200,
+                content_type="application/json",
             )
         else:
-            response = make_response(
-                json.dump({"errors": {"name": f"User {name} not found"}}),
-                404,
-                json.dump({"Content-Type": "application/json"})
+            return Response(
+                response=json.dumps({"errors": {"name": f"User {name} not found"}}),
+                status=404,
+                content_type="application/json",
             )
-        return response
 
     @staticmethod
-    def update_user(name) -> dict:
-        json_data = request.form
+    def update_user(name: str) -> Response:
+        json_data = request.get_json()
         if name in FlaskExercise.users:
             FlaskExercise.users[json_data["name"]] = FlaskExercise.users.pop(name)
-            response = make_response(
-                json.dump({"data": "My name is <new_name>"}),
-                200,
-                json.dump({"Content-Type": "application/json"})
+            return Response(
+                response=json.dumps({"data": f"My name is {json_data['name']}"}),
+                status=200,
+                content_type="application/json",
             )
         else:
-            response = make_response(
-                json.dump({"errors": {"name": f"User {name} not found"}}),
-                404,
-                json.dump({"Content-Type": "application/json"})
+            return Response(
+                response=json.dumps({"errors": {"name": f"User {name} not found"}}),
+                status=404,
+                content_type="application/json",
             )
-        return response
 
     @staticmethod
-    def delete_user(name) -> dict:
+    def delete_user(name: str) -> Response:
         if name in FlaskExercise.users:
             FlaskExercise.users.pop(name)
-            response = make_response({}, 204)
+            return Response(status=204)
         else:
-            response = make_response(
-                json.dump({"errors": {"name": f"User {name} not found"}}),
-                404,
-                json.dump({"Content-Type": "application/json"})
+            return Response(
+                response=json.dumps({"errors": {"name": f"User {name} not found"}}),
+                status=404,
+                content_type="application/json",
             )
-        return response
