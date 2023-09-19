@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, json, request, Response
 
 
 class FlaskExercise:
@@ -25,7 +25,77 @@ class FlaskExercise:
     DELETE /user/<name> - удаление пользователя
     В ответ должен вернуться статус 204
     """
+    users = {}
 
     @staticmethod
     def configure_routes(app: Flask) -> None:
-        pass
+        app.add_url_rule("/user", methods=["POST"], view_func=FlaskExercise.create_user)
+        app.add_url_rule("/user/<string:name>", methods=["GET"], view_func=FlaskExercise.get_user)
+        app.add_url_rule(
+            "/user/<string:name>", methods=["PATCH"], view_func=FlaskExercise.update_user
+        )
+        app.add_url_rule(
+            "/user/<string:name>", methods=["DELETE"], view_func=FlaskExercise.delete_user
+        )
+
+    @staticmethod
+    def create_user() -> Response:
+        json_data = request.get_json()
+        if "name" not in json_data:        
+            return Response(
+                response=json.dumps({"errors": {"name": "This field is required"}}),
+                status=422,
+                content_type="application/json",
+            )
+        
+        new_user = json_data["name"]
+        FlaskExercise.users[new_user] = {}
+        return Response(
+            response=json.dumps({"data": f"User {new_user} is created!"}),
+            status=201,
+            content_type="application/json",
+        )
+
+    @staticmethod
+    def get_user(name: str) -> Response:
+        if name in FlaskExercise.users:
+            return Response(
+                response=json.dumps({"data": f"My name is {name}"}),
+                status=200,
+                content_type="application/json",
+            )
+        
+        return Response(
+            response=json.dumps({"errors": {"name": f"User {name} not found"}}),
+            status=404,
+            content_type="application/json",
+        )
+
+    @staticmethod
+    def update_user(name: str) -> Response:
+        json_data = request.get_json()
+        if name not in FlaskExercise.users:
+            return Response(
+                response=json.dumps({"errors": {"name": f"User {name} not found"}}),
+                status=404,
+                content_type="application/json",
+            )
+        
+        FlaskExercise.users[json_data["name"]] = FlaskExercise.users.pop(name)
+        return Response(
+            response=json.dumps({"data": f"My name is {json_data['name']}"}),
+            status=200,
+            content_type="application/json",
+        )
+
+    @staticmethod
+    def delete_user(name: str) -> Response:
+        if name in FlaskExercise.users:
+            FlaskExercise.users.pop(name)
+            return Response(status=204)
+        
+        return Response(
+            response=json.dumps({"errors": {"name": f"User {name} not found"}}),
+            status=404,
+            content_type="application/json",
+        )
